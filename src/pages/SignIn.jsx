@@ -6,18 +6,24 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { signinWithEmailandPassword, isLoggedIn } = useFirebase();
+  const { signinWithEmailandPassword, isLoggedIn, signInWithGoogle } = useFirebase();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     signinWithEmailandPassword(email, password);
+    console.log("✨Sign In Successfully✨")
   };
+
+  const handleSignInWithGoogle = () => {
+    signInWithGoogle();
+    console.log("✨Sign In Successfully✨")
+  }
 
   useEffect(() => {
     if (isLoggedIn) {
       navigate("/dashboard");
     }
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -93,7 +99,9 @@ const SignIn = () => {
         </form>
 
         <div>
-          <button className="mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          <button 
+          onClick={handleSignInWithGoogle}  
+          className="mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Sign In With Google
           </button>
         </div>
