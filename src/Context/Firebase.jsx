@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from "firebase/auth";
+import { getDatabase, ref, set, get, child } from "firebase/database";
 
 const FirebaseContext = createContext(null);
 
@@ -24,12 +25,14 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(firebaseApp);
+const database = getDatabase(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 
 export const useFirebase = () => useContext(FirebaseContext);
 
 export const FirebaseProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [tasks, setTasks] = useState(null);
 
   useEffect(() => {
     onAuthStateChanged(firebaseAuth, (user) => {
@@ -71,9 +74,33 @@ export const FirebaseProvider = ({ children }) => {
 
   const isLoggedIn = user ? true : false;
 
+  const putData = (key, data) => set(ref(database, key), data); 
+
+  const getTasks = async (key) => {
+    try {
+      // Ensure key is defined before accessing the database
+      if (!key) {
+        console.error("Invalid database key:", key);
+        throw new Error("Invalid database key");
+      }
+  
+      const snapshot = await get(child(ref(database), key));
+      if (snapshot.exists()) {
+        return snapshot.val();
+      } else {
+        console.warn("No tasks found for key:", key);
+        return []; // Return an empty array if no tasks found
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      throw error; // Rethrow the error for the caller to handle
+    }
+  };
+  
+
   return (
     <FirebaseContext.Provider
-      value={{ signupWithEmailandPassword, user, isLoggedIn, signinWithEmailandPassword, signInWithGoogle, signOut}}
+      value={{ signupWithEmailandPassword, user, tasks, isLoggedIn, signinWithEmailandPassword, signInWithGoogle, signOut, putData, getTasks}}
     >
       {children}
     </FirebaseContext.Provider>
