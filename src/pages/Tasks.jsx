@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Addicon from "../assets/Addicon.svg";
 import Editicon from "../assets/Editicon.svg";
 import Deleteicon from "../assets/Delete.svg";
 import Checkicon from "../assets/Check.svg";
 import { useFirebase } from "../Context/Firebase";
+import { Button } from "@/components/ui/button"
 
 function Tasks() {
   const [text, setText] = useState("");
@@ -60,6 +61,7 @@ function Tasks() {
 
   return (
     <>
+      <Button variant="outline">Button</Button>
       <div className="font-poppins w-auto h-screen">
         <div className="font-black w-full bg-white text-6xl p-4">Tasks</div>
         <div className="todo-input-container w-full h-full flex items-center justify-center">
@@ -91,7 +93,7 @@ function Tasks() {
                   key={ind}
                   className="flex h-auto w-auto items-center border-2 border--900 justify-between rounded-lg shadow-md p-3"
                 >
-                  <div className={`flex items-center justify-between gap-3 ${edit && currTask.id===task.id && "w-full"}`}>
+                  <div className={`flex items-center justify-between gap-3 ${edit && currTask.id === task.id && "w-full"}`}>
                     <input
                       type="checkbox"
                       name="check"
@@ -116,10 +118,10 @@ function Tasks() {
                           name="task"
                           id="task"
                           value={currTask.text}
-                          onChange={(e) => setCurrTask({...currTask, text: e.target.value})}
+                          onChange={(e) => setCurrTask({ ...currTask, text: e.target.value })}
                           placeholder="Let's do something"
                           className="rounded-lg w-full p-2 bg-trans focus:outline-none"
-                          // onKeyDown={(e) => handleEnter(e.key)}
+                        // onKeyDown={(e) => handleEnter(e.key)}
                         />
                         <img
                           src={Checkicon}
@@ -140,7 +142,7 @@ function Tasks() {
                         src={Editicon}
                         alt="Edit Icon"
                         className="w-5 cursor-pointer"
-                        onClick={()=> editTask(task)}
+                        onClick={() => editTask(task)}
                       />
                       <img
                         src={Deleteicon}
