@@ -9,7 +9,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const { signupWithEmailandPassword, user, isLoggedIn } = useFirebase();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signupWithEmailandPassword(email, password, name);
     console.log("✨Account Created✨")
