@@ -3,7 +3,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MetricCards } from "./metric-cards";
 import { Overview } from "./overview";
-import { RecentActivity } from "./recent-sales";
+import { RecentActivity } from "./recent-tasks";
 
 export function DashboardTabs() {
   return (
@@ -19,8 +19,8 @@ export function DashboardTabs() {
       <TabsContent value="overview" className="space-y-4">
         <MetricCards />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Overview />
           <RecentActivity />
+          <Overview />
         </div>
       </TabsContent>
       <TabsContent value="Habits" className="space-y-4">

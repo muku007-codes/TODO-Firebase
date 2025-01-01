@@ -4,7 +4,7 @@ import Editicon from "../assets/Editicon.svg";
 import Deleteicon from "../assets/Delete.svg";
 import Checkicon from "../assets/Check.svg";
 import { useFirebase } from "../Context/Firebase";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 function Tasks() {
   const [text, setText] = useState("");
@@ -14,16 +14,61 @@ function Tasks() {
   const [edit, setEdit] = useState(false);
   const [currTask, setCurrTask] = useState({});
 
-  const handleAddTask = () => {
-    if (text.length > 0) {
+  // const handleAddTask = () => {
+  //   if (text.length > 0) {
+  //     const newTask = {
+  //       id: Math.random() * 10,
+  //       checked: false,
+  //       text: text,
+  //     };
+  //     setTasks([newTask, ...tasks]); // Update local state immediately
+  //     firebase.putData(`users/${firebase.user.uid}/tasks`, [newTask, ...tasks]); // Update Firebase
+  //     setText("");
+  //   }
+  // };
+
+  const handleAddTask = async () => {
+    if (text.length > 0 && firebase.user) {
       const newTask = {
-        id: Math.random() * 10,
-        checked: false,
-        text: text,
+        title: text,
+        status: "Pending",
+        createdAt: new Date(),
       };
-      setTasks([newTask, ...tasks]); // Update local state immediately
-      firebase.putData(`users/${firebase.user.uid}/tasks`, [newTask, ...tasks]); // Update Firebase
-      setText("");
+
+      try {
+        // Add the task to Firestore
+        await firebase.addTask(firebase.user.uid, newTask);
+
+        // Update local state to reflect the added task
+        setTasks([newTask, ...tasks]);
+
+        // Clear the input field
+        setText("");
+        console.log("Task added successfully!");
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
+    }
+  };
+
+  const updatetodo = async () => {
+    try {
+      firebase.updateTask(firebase.user.uid, "XD5T5YwnxiYjZ8eu7HnK", {
+        title: "Updated Task",
+        status: "Done",
+      });
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+  };
+
+  const showTask = async () => {
+    if (!firebase?.user) return;
+    try {
+      const snapshot = await firebase.getTasks(firebase?.user.uid);
+      console.log("Tasks:", snapshot);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
     }
   };
 
@@ -34,14 +79,14 @@ function Tasks() {
   const editTask = (task) => {
     setEdit(true);
     setCurrTask(task);
-  }
+  };
 
   const addTask = (id, currTask) => {
     setEdit(false);
-    let UpdatedTask = tasks.map((task) => (task.id === id ? currTask : task))
+    let UpdatedTask = tasks.map((task) => (task.id === id ? currTask : task));
     setTasks(UpdatedTask);
     firebase.putData(`users/${firebase.user.uid}/tasks`, UpdatedTask); // Update Firebase
-  }
+  };
 
   const deleteTask = (id) => {
     let freshTasks = tasks.filter((task) => task.id !== id);
@@ -52,7 +97,7 @@ function Tasks() {
   useEffect(() => {
     if (firebase.user) {
       firebase
-        .getTasks(`users/${firebase.user.uid}/tasks`)
+        .getTask(`users/${firebase.user.uid}/tasks`)
         .then((fetchedTasks) => {
           setTasks(fetchedTasks || []); // Update local state with fetched tasks
         });
@@ -61,7 +106,12 @@ function Tasks() {
 
   return (
     <>
-      <Button variant="outline">Button</Button>
+      <Button variant="outline" onClick={showTask}>
+        Add
+      </Button>
+      <Button variant="outline" onClick={updatetodo}>
+        Update
+      </Button>
       <div className="font-poppins w-auto h-screen">
         <div className="font-black w-full bg-white text-6xl p-4">Tasks</div>
         <div className="todo-input-container w-full h-full flex items-center justify-center">
@@ -93,7 +143,11 @@ function Tasks() {
                   key={ind}
                   className="flex h-auto w-auto items-center border-2 border--900 justify-between rounded-lg shadow-md p-3"
                 >
-                  <div className={`flex items-center justify-between gap-3 ${edit && currTask.id === task.id && "w-full"}`}>
+                  <div
+                    className={`flex items-center justify-between gap-3 ${
+                      edit && currTask.id === task.id && "w-full"
+                    }`}
+                  >
                     <input
                       type="checkbox"
                       name="check"
@@ -118,10 +172,12 @@ function Tasks() {
                           name="task"
                           id="task"
                           value={currTask.text}
-                          onChange={(e) => setCurrTask({ ...currTask, text: e.target.value })}
+                          onChange={(e) =>
+                            setCurrTask({ ...currTask, text: e.target.value })
+                          }
                           placeholder="Let's do something"
                           className="rounded-lg w-full p-2 bg-trans focus:outline-none"
-                        // onKeyDown={(e) => handleEnter(e.key)}
+                          // onKeyDown={(e) => handleEnter(e.key)}
                         />
                         <img
                           src={Checkicon}

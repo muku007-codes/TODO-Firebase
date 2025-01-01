@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,98 +13,132 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFirebase } from "@/Context/Firebase";
 
 type Todo = {
-  id: number;
-  text: string;
-  completed: boolean;
+  id: string;
+  title: string;
   status: "pending" | "in-progress" | "done";
+  createdAt: Date;
 };
-
-type Activity = {
-  user: string;
-  action: string;
-  item: string;
-  time: string;
-};
-
-const activities: Activity[] = [
-  {
-    user: "Jasbir Singh",
-    action: "changed the status to Done on",
-    item: "ST-82 - Improve doc with ai and also check on the youtube url to doc",
-    time: "2 days ago",
-  },
-  {
-    user: "Jasbir Singh",
-    action: "changed the status to Done on",
-    item: "ST-86 - Improve text to doc, fix youtube to doc and web url to doc features",
-    time: "2 days ago",
-  },
-  {
-    user: "Jasbir Singh",
-    action: "changed the status to Done on",
-    item: "ST-85 - Add a toast message when a user has fewer credits",
-    time: "2 days ago",
-  },
-];
 
 export function RecentActivity() {
+  const firebase = useFirebase();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editText, setEditText] = useState("");
+  const [editingId, setEditingId] = useState<string>("");
+  const [edittitle, setEdittitle] = useState("");
 
-
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      setTodos([
-        ...todos,
-        {
-          id: Date.now(),
-          text: newTodo,
-          completed: false,
-          status: "pending",
-        },
-      ]);
-      setNewTodo("");
+  const toggleTodo = async (todo: Todo) => {
+    if (!firebase?.user) return;
+    try {
+      await firebase.updateTask(firebase.user.uid, todo.id, {
+        status:
+          todos.filter((task) => task.id === todo.id)[0].status === "pending"
+            ? "Done"
+            : "Pending",
+      });
+      setTodos(
+        todos.map((task) =>
+          task.id === todo.id
+            ? {
+                ...task,
+                status: task.status === "pending" ? "done" : "pending",
+              }
+            : task
+        )
+      );
+    } catch (error) {
+      console.error("Error adding task:", error);
     }
   };
 
-  const toggleTodo = (id: number) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const deleteTodo = (id: string) => {
+    if (!firebase?.user) return;
+    try {
+      firebase.deleteTask(firebase.user.uid, id);
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+
+  const updateStatus = async (id: string | string, status: Todo["status"]) => {
+    if (!firebase?.user) return;
+    try {
+      await firebase.updateTask(firebase.user.uid, id, {
+        title: "Updated Task",
+        status: status,
+      });
+      setTodos(
+        todos.map((todo) => (todo.id === id ? { ...todo, status } : todo))
+      );
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+  };
+
+  const addTodo = async () => {
+    if (newTodo.length > 0 && firebase.user) {
+      if (newTodo.trim()) {
+        try {
+          const firebaseId = await firebase.addTask(firebase.user.uid, {
+            title: newTodo,
+            status: "pending",
+            createdAt: new Date(),
+          });
+
+          setTodos([
+            ...todos,
+            {
+              id: firebaseId,
+              title: newTodo,
+              status: "pending",
+              createdAt: new Date(),
+            },
+          ]);
+          setNewTodo("");
+        } catch (error) {
+          console.error("Error adding task:", error);
+        }
+      }
+    }
   };
 
   const startEditing = (todo: Todo) => {
     setEditingId(todo.id);
-    setEditText(todo.text);
+    setEdittitle(todo.title);
   };
 
   const saveEdit = () => {
-    if (editingId && editText.trim()) {
+    if (firebase.user && editingId && edittitle.trim()) {
+      try {
+        firebase.updateTask(firebase.user.uid, editingId, {
+          title: edittitle
+        });
+      } catch (error) {
+        console.error("Error on updating task:", error);
+      }
+
       setTodos(
         todos.map((todo) =>
-          todo.id === editingId ? { ...todo, text: editText } : todo
+          todo.id === editingId ? { ...todo, title: edittitle } : todo
         )
       );
-      setEditingId(null);
-      setEditText("");
+
+      setEditingId("");
+      setEdittitle("");
     }
   };
 
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
-
-  const updateStatus = (id: number, status: Todo["status"]) => {
-    setTodos(
-      todos.map((todo) => (todo.id === id ? { ...todo, status } : todo))
-    );
-  };
+  useEffect(() => {
+    if (firebase.user) {
+      firebase.getTasks(firebase.user.uid).then((fetchedTasks) => {
+        console.log("fetchedTasks", fetchedTasks);
+        setTodos(fetchedTasks || []); // Update local state with fetched tasks
+      });
+    }
+  }, [firebase.user]);
 
   return (
     <Card className="col-span-4">
@@ -135,26 +168,28 @@ export function RecentActivity() {
                 >
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={todo.completed}
-                      onCheckedChange={() => toggleTodo(todo.id)}
+                      checked={(todo.status).toLowerCase() === "done"}
+                      onCheckedChange={() => toggleTodo(todo)}
                     />
                     {editingId === todo.id ? (
                       <Input
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
+                        value={edittitle}
+                        onChange={(e) => setEdittitle(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && saveEdit()}
                         onBlur={saveEdit}
                         autoFocus
                       />
                     ) : (
-                      <span className={todo.completed ? "line-through" : ""}>
-                        {todo.text}
+                      <span
+                        className={todo.status === "done" ? "line-through" : ""}
+                      >
+                        {todo.title}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <Select
-                      value={todo.status}
+                      value={todo.status.toLowerCase()}
                       onValueChange={(value) =>
                         updateStatus(todo.id, value as Todo["status"])
                       }
@@ -187,28 +222,6 @@ export function RecentActivity() {
               ))}
             </div>
           </div>
-
-          {/* Activity Feed Section */}
-          {/* <div className="space-y-4">
-            {activities.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-4">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback>JS</AvatarFallback>
-                </Avatar>
-                <div className="space-y-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{activity.user}</span>{" "}
-                    {activity.action}{" "}
-                    <span className="font-medium">{activity.item}</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {activity.time}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div> */}
         </div>
       </CardContent>
     </Card>

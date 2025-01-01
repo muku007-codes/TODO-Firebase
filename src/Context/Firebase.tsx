@@ -15,6 +15,19 @@ import {
   User,
 } from "firebase/auth";
 import { getDatabase, ref, set, get, child } from "firebase/database";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  deleteDoc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
+
 import { initializeApp } from "firebase/app";
 
 // Firebase configuration
@@ -33,16 +46,37 @@ const firebaseAuth = getAuth(firebaseApp);
 const database = getDatabase(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 
+// Firestore configuration
+const firestore = getFirestore(firebaseApp);
+
 // Define context type
 interface FirebaseContextType {
   user: User | null;
-  signupWithEmailandPassword: (email: string, password: string, name: string) => Promise<void>;
-  signinWithEmailandPassword: (email: string, password: string) => Promise<void>;
+  signupWithEmailandPassword: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<void>;
+  signinWithEmailandPassword: (
+    email: string,
+    password: string
+  ) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => void;
   isLoggedIn: boolean;
   putData: (key: string, data: any) => void;
-  getTasks: (key: string) => Promise<any>;
+  getTask: (key: string) => Promise<any>;
+  addTask: (
+    userId: string,
+    taskData: { title: string; status: string; createdAt: Date }
+  ) => Promise<void>;
+  getTasks: (userId: string) => Promise<any[]>;
+  updateTask: (
+    userId: string,
+    taskId: string,
+    updatedData: Partial<{ title: string; status: string }>
+  ) => Promise<void>;
+  deleteTask: (userId: string, taskId: string) => Promise<void>;
 }
 
 // Create Firebase context
@@ -58,7 +92,9 @@ export const useFirebase = (): FirebaseContextType => {
 };
 
 // FirebaseProvider component
-export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -68,18 +104,33 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     return () => unsubscribe();
   }, []);
 
-  const signupWithEmailandPassword = async (email: string, password: string, name: string) => {
+  const signupWithEmailandPassword = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password
+      );
       setUser(userCredential.user);
     } catch (error: any) {
       console.error("Error signing up:", error.message);
     }
   };
 
-  const signinWithEmailandPassword = async (email: string, password: string) => {
+  const signinWithEmailandPassword = async (
+    email: string,
+    password: string
+  ) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password
+      );
       setUser(userCredential.user);
     } catch (error: any) {
       console.error("Error signing in:", error.message);
@@ -105,7 +156,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
     set(ref(database, key), data);
   };
 
-  const getTasks = async (key: string): Promise<any> => {
+  const getTask = async (key: string): Promise<any> => {
     try {
       const snapshot = await get(child(ref(database), key));
       if (snapshot.exists()) {
@@ -116,7 +167,60 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
       }
     } catch (error: any) {
       console.error("Error fetching tasks:", error.message);
-      throw error;
+      // throw error;
+    }
+  };
+
+  // FireStore fucntions for tasks
+
+  // Add a task
+  const addTask = async (
+    userId: string,
+    taskData: { title: string; status: string; createdAt: Date }
+  ) => {
+    try {
+      const tasksCollection = collection(firestore, "users", userId, "tasks");
+      const docRef = await addDoc(tasksCollection, taskData);
+      return docRef.id;
+    } catch (error: any) {
+      console.error("Error adding task:", error.message);
+    }
+  };
+
+  // Get tasks
+  const getTasks = async (userId: string): Promise<any[]> => {
+    try {
+      const tasksCollection = collection(firestore, "users", userId, "tasks");
+      const querySnapshot = await getDocs(tasksCollection);
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error: any) {
+      console.error("Error fetching tasks:", error.message);
+    }
+  };
+
+  // Update a task
+  const updateTask = async (
+    userId: string,
+    taskId: string,
+    updatedData: Partial<{ title: string; status: string }>
+  ) => {
+    try {
+      const taskDoc = doc(firestore, "users", userId, "tasks", taskId);
+      await updateDoc(taskDoc, updatedData);
+      console.log("Task updated successfully!");
+    } catch (error: any) {
+      console.error("Error updating task:", error.message);
+    }
+  };
+
+  // Delete a task
+  const deleteTask = async (userId: string, taskId: string) => {
+    try {
+      const taskDoc = doc(firestore, "users", userId, "tasks", taskId);
+      await deleteDoc(taskDoc);
+      console.log("Task deleted successfully!");
+    } catch (error: any) {
+      console.error("Error deleting task:", error.message);
     }
   };
 
@@ -130,7 +234,11 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({ children }
         signOut,
         isLoggedIn,
         putData,
+        addTask,
         getTasks,
+        updateTask,
+        deleteTask,
+        getTask
       }}
     >
       {children}
