@@ -81,7 +81,20 @@ interface FirebaseContextType {
       createdAt: Date;
     }
   ) => Promise<void>;
+  addHabit: (
+    userId: string,
+    habitData: {
+      name: string;
+      goal: number;
+      achieved: number;
+      completedDates: string[];
+      color: string;
+      createdAt: Date;
+      lastUpdatedAt?: { seconds: number; nanoseconds: number };
+    }
+  ) => Promise<void>;
   getTasks: (userId: string) => Promise<any[]>;
+  getHabit: (userId: string) => Promise<any[]>;
   updateTask: (
     userId: string,
     taskId: string,
@@ -188,8 +201,6 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  // FireStore fucntions for tasks
-
   // Add a task
   const addTask = async (
     userId: string,
@@ -222,6 +233,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // Update a task
   const updateTask = async (
     userId: string,
     taskId: string,
@@ -253,6 +265,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  // Delete all tasks
   const deleteAllTasks = async (userId: string, taskIds: string[]) => {
     try {
       const batch = writeBatch(firestore);
@@ -266,6 +279,72 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
       console.log("Tasks deleted successfully!");
     } catch (error: any) {
       console.error("Error deleting tasks:", error.message);
+    }
+  };
+
+  const addHabit = async (
+    userId: string,
+    habitData: {
+      name: string;
+      goal: number;
+      achieved: number;
+      completedDates: string[];
+      color: string;
+      createdAt: Date;
+      lastUpdatedAt?: { seconds: number; nanoseconds: number };
+    }
+  ) => {
+    try {
+      const habitsCollection = collection(firestore, "users", userId, "habits");
+      const docRef = await addDoc(habitsCollection, habitData);
+      console.log("Habit added successfully!", docRef.id);
+      return docRef.id;
+    } catch (error: any) {
+      console.error("Error adding habit:", error.message);
+    }
+  };
+
+  // Get tasks
+  const getHabit = async (userId: string): Promise<any[]> => {
+    try {
+      const habitCollection = collection(firestore, "users", userId, "habits");
+      const querySnapshot = await getDocs(habitCollection);
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error: any) {
+      console.error("Error fetching tasks:", error.message);
+    }
+  };
+
+  // Update a task
+  const updateHabit = async (
+    userId: string,
+    habitId: string,
+    updatedData: Partial<{
+      name: string;
+      goal: number;
+      achieved: number;
+      completedDates: string[];
+      color: string;
+      createdAt: Date;
+      lastUpdatedAt?: { seconds: number; nanoseconds: number };
+    }>
+  ) => {
+    try {
+      const taskDoc = doc(firestore, "users", userId, "habits", habitId);
+      await updateDoc(taskDoc, updatedData);
+    } catch (error: any) {
+      console.error("Error updating Habit:", error.message);
+    }
+  };
+
+  // Delete a task
+  const deleteHabit = async (userId: string, taskId: string) => {
+    try {
+      const taskDoc = doc(firestore, "users", userId, "tasks", taskId);
+      await deleteDoc(taskDoc);
+      console.log("Task deleted successfully!");
+    } catch (error: any) {
+      console.error("Error deleting task:", error.message);
     }
   };
 
@@ -285,6 +364,9 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
         deleteTask,
         getTask,
         deleteAllTasks,
+        addHabit,
+        getHabit,
+        updateHabit
       }}
     >
       {children}

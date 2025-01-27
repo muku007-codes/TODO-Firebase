@@ -19,7 +19,6 @@ const StopWatchContainer = () => {
   useEffect(() => {
     if (firebase.user) {
       firebase.getTasks(firebase.user.uid).then((fetchedTasks) => {
-        console.log("Stop Watch", fetchedTasks);
         setTodos(fetchedTasks || []);
       });
     }

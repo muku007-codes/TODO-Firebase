@@ -1,49 +1,45 @@
 "use client";
-
+// [
+//     {
+//       id: "1",
+//       name: "Journal",
+//       goal: 20,
+//       achieved: 19,
+//       completedDates: [],
+//       color: "yellow",
+//     },
+//     {
+//       id: "2",
+//       name: "Exercise",
+//       goal: 20,
+//       achieved: 14,
+//       completedDates: [],
+//       color: "green",
+//     },
+//   ]
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFirebase } from "@/Context/Firebase";
 
 type Habit = {
-  id: string;
+  id: string | void;
   name: string;
   goal: number;
   achieved: number;
   completedDates: string[]; // Format: YYYY-MM-DD
   color: string;
-};
-
-type Note = {
-  id: string;
-  date: string;
-  content: string;
+  createdAt?: Date;
+  lastUpdatedAt?: { seconds: number; nanoseconds: number };
 };
 
 export function HabitTracker() {
+  const firebase = useFirebase();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: "1",
-      name: "Journal",
-      goal: 20,
-      achieved: 19,
-      completedDates: [],
-      color: "yellow",
-    },
-    {
-      id: "2",
-      name: "Exercise",
-      goal: 20,
-      achieved: 14,
-      completedDates: [],
-      color: "green",
-    },
-  ]);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [newHabit, setNewHabit] = useState("");
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [newNote, setNewNote] = useState("");
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -148,38 +144,94 @@ export function HabitTracker() {
     );
   };
 
-  const addHabit = () => {
-    if (newHabit.trim()) {
-      const habit: Habit = {
-        id: Date.now().toString(),
-        name: newHabit,
-        goal: 21,
-        achieved: 0,
-        completedDates: [],
-        color: randomColors(),
-      };
-      setHabits([...habits, habit]);
-      setNewHabit("");
+  const addHabit = async () => {
+    if (newHabit.length > 0 && firebase.user) {
+      if (newHabit.trim()) {
+        try {
+          const color = randomColors();
+          const firebaseId = await firebase.addHabit(firebase.user.uid, {
+            name: newHabit,
+            goal: 21,
+            achieved: 0,
+            completedDates: [],
+            color: color,
+            createdAt: new Date(),
+            lastUpdatedAt: {
+              seconds: Math.floor(Date.now() / 1000),
+              nanoseconds: 0,
+            },
+          });
+
+          setHabits([
+            ...habits,
+            {
+              id: firebaseId,
+              name: newHabit,
+              goal: 21,
+              achieved: 0,
+              completedDates: [],
+              color: color,
+              lastUpdatedAt: {
+                seconds: Math.floor(Date.now() / 1000),
+                nanoseconds: 0,
+              },
+              createdAt: new Date(),
+            },
+          ]);
+          setNewHabit("");
+        } catch (error) {
+          console.error("Error adding task:", error);
+        }
+      }
     }
   };
 
-  const handleGoal = (id: string, value: number) => {
-    setHabits((prev) => {
-      return prev.map((habit) => {
-        if (habit.id === id) {
-          return {
-            ...habit,
-            goal: value,
-          };
-        }
-        return habit;
+  useEffect(() => {
+    if (firebase.user) {
+      firebase.getHabit(firebase.user.uid).then((fetchedTasks) => {
+        setHabits(fetchedTasks || []); // Update local state with fetched tasks
       });
-    });
+    }
+  }, [firebase.user]);
+
+  const handleGoal = async (id: string | string, value: Habit["goal"]) => {
+    if (!firebase?.user) return;
+    try {
+      await firebase.updateHabit(firebase.user.uid, id, {
+        goal: value,
+      });
+      setHabits((prev) => {
+        return prev.map((habit) => {
+          if (habit.id === id) {
+            return {
+              ...habit,
+              goal: value,
+            };
+          }
+          return habit;
+        });
+      });
+    } catch (error) {
+      console.error("Error updating habit:", error);
+    }
   };
+
+//   const handleGoal = (id: string, value: number) => {
+//     setHabits((prev) => {
+//       return prev.map((habit) => {
+//         if (habit.id === id) {
+//           return {
+//             ...habit,
+//             goal: value,
+//           };
+//         }
+//         return habit;
+//       });
+//     });
+//   };
 
   return (
     <div className="p-4 space-y-8">
-      {/* Month Navigation */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => navigateMonth("prev")}>
           <ChevronLeft className="h-4 w-4" />
@@ -253,11 +305,13 @@ export function HabitTracker() {
                 <td className="px-4 py-2 text-center">
                   {" "}
                   <input
-                  className="w-10"
+                    className="w-10"
                     type="number"
                     id={habit.id}
                     value={habit.goal}
-                    onChange={(e) => handleGoal(habit.id, Number(e.target.value))}
+                    onChange={(e) =>
+                      handleGoal(habit.id, Number(e.target.value))
+                    }
                   />{" "}
                 </td>
                 <td
