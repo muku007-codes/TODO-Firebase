@@ -26,6 +26,7 @@ import {
   updateDoc,
   query,
   where,
+  writeBatch,
 } from "firebase/firestore";
 
 import { initializeApp } from "firebase/app";
@@ -68,13 +69,29 @@ interface FirebaseContextType {
   getTask: (key: string) => Promise<any>;
   addTask: (
     userId: string,
-    taskData: { title: string; status: string; createdAt: Date }
+    taskData: {
+      title: string;
+      status: string;
+      isRunning?: boolean;
+      timeSpent?: number;
+      lastUpdatedAt?: {
+        seconds: number;
+        nanoseconds: number;
+      };
+      createdAt: Date;
+    }
   ) => Promise<void>;
   getTasks: (userId: string) => Promise<any[]>;
   updateTask: (
     userId: string,
     taskId: string,
-    updatedData: Partial<{ title: string; status: string }>
+    updatedData: Partial<{
+      title: string;
+      status: string;
+      timeSpent: number;
+      isRunning: boolean;
+      lastUpdatedAt: { seconds: number; nanoseconds: number };
+    }>
   ) => Promise<void>;
   deleteTask: (userId: string, taskId: string) => Promise<void>;
 }
@@ -176,7 +193,14 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
   // Add a task
   const addTask = async (
     userId: string,
-    taskData: { title: string; status: string; createdAt: Date }
+    taskData: {
+      title: string;
+      status: string;
+      createdAt: Date;
+      isRunning?: boolean;
+      timeSpent?: number;
+      lastUpdatedAt?: { seconds: number; nanoseconds: number };
+    }
   ) => {
     try {
       const tasksCollection = collection(firestore, "users", userId, "tasks");
@@ -198,16 +222,21 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  // Update a task
   const updateTask = async (
     userId: string,
     taskId: string,
-    updatedData: Partial<{ title: string; status: string }>
+    updatedData: Partial<{
+      title: string;
+      status: string;
+      isRunning: boolean;
+      timeSpent: number;
+      lastUpdatedAt: { seconds: number; nanoseconds: number };
+    }>
   ) => {
     try {
       const taskDoc = doc(firestore, "users", userId, "tasks", taskId);
       await updateDoc(taskDoc, updatedData);
-      console.log("Task updated successfully!");
+      console.log("Task updated successfully!", updatedData);
     } catch (error: any) {
       console.error("Error updating task:", error.message);
     }
@@ -221,6 +250,22 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
       console.log("Task deleted successfully!");
     } catch (error: any) {
       console.error("Error deleting task:", error.message);
+    }
+  };
+
+  const deleteAllTasks = async (userId: string, taskIds: string[]) => {
+    try {
+      const batch = writeBatch(firestore);
+
+      taskIds.forEach((taskId) => {
+        const taskDoc = doc(firestore, "users", userId, "tasks", taskId);
+        batch.delete(taskDoc);
+      });
+
+      await batch.commit();
+      console.log("Tasks deleted successfully!");
+    } catch (error: any) {
+      console.error("Error deleting tasks:", error.message);
     }
   };
 
@@ -238,7 +283,8 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
         getTasks,
         updateTask,
         deleteTask,
-        getTask
+        getTask,
+        deleteAllTasks,
       }}
     >
       {children}

@@ -64,3 +64,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.remove-scroll-bar{
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 8px;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background: #18181b;
+  border-radius: 8px;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+  border-radius: 8px;
+  padding: 2px;
+  background: rgb(220, 220, 220);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #18181b;
+  border-radius: 8px;
+}
+
+html:-webkit-scrollbar-thumb:hover {
+  background: darkgray;
+}

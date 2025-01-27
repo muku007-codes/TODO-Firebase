@@ -18,8 +18,14 @@ import { useFirebase } from "@/Context/Firebase";
 type Todo = {
   id: string;
   title: string;
-  status: "pending" | "in-progress" | "done";
   createdAt: Date;
+  status: "pending" | "in-progress" | "done";
+  isRunning: boolean;
+  timeSpent: number;
+  lastUpdatedAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
 };
 
 export function RecentActivity() {
@@ -86,6 +92,12 @@ export function RecentActivity() {
             title: newTodo,
             status: "pending",
             createdAt: new Date(),
+            isRunning: false,
+            timeSpent: 0,
+            lastUpdatedAt: {
+              seconds: Math.floor(Date.now() / 1000),
+              nanoseconds: 0,
+            },
           });
 
           setTodos([
@@ -95,6 +107,12 @@ export function RecentActivity() {
               title: newTodo,
               status: "pending",
               createdAt: new Date(),
+              isRunning: false,
+              timeSpent: 0,
+              lastUpdatedAt: {
+                seconds: Math.floor(Date.now() / 1000),
+                nanoseconds: 0,
+              },
             },
           ]);
           setNewTodo("");
@@ -114,7 +132,7 @@ export function RecentActivity() {
     if (firebase.user && editingId && edittitle.trim()) {
       try {
         firebase.updateTask(firebase.user.uid, editingId, {
-          title: edittitle
+          title: edittitle,
         });
       } catch (error) {
         console.error("Error on updating task:", error);
@@ -134,7 +152,7 @@ export function RecentActivity() {
   useEffect(() => {
     if (firebase.user) {
       firebase.getTasks(firebase.user.uid).then((fetchedTasks) => {
-        console.log("fetchedTasks", fetchedTasks);
+        // console.log("fetchedTasks", fetchedTasks);
         setTodos(fetchedTasks || []); // Update local state with fetched tasks
       });
     }
@@ -160,15 +178,15 @@ export function RecentActivity() {
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <div className="space-y-2">
-              {todos.map((todo) => (
+            <div className="space-y-2 max-h-[300px] overflow-y-scroll custom-scroll-bar">
+              {todos?.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center justify-between space-x-2 rounded-lg border p-3"
                 >
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={(todo.status).toLowerCase() === "done"}
+                      checked={todo.status.toLowerCase() === "done"}
                       onCheckedChange={() => toggleTodo(todo)}
                     />
                     {editingId === todo.id ? (

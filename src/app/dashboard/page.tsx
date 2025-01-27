@@ -1,19 +1,13 @@
 // import { DashboardHeader } from "@/components/header"
 import { DashboardShell } from "@/components/shell"
 import { DashboardTabs } from "@/components/tabs"
-import { DateRangePicker } from "@/components/date-range-picker"
 import { MainNav } from "@/components/main-nav"
-import { MetricCards } from "@/components/metric-cards"
-import { Overview } from "@/components/overview"
-import { RecentSales } from "@/components/recent-tasks"
-import { Search } from "@/components/search"
 import { UserNav } from "@/components/user-nav"
-import { Header } from "@/components/header"
-
+import UpdateTasksDefaults from "@/components/UpdateTasksDefaults"
 
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col custom-scroll-bar">
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
           <MainNav className="mx-6" />
@@ -36,6 +30,7 @@ export default function DashboardPage() {
           </div> */}
         </div>
       </div>
+      {/* <UpdateTasksDefaults/> */}
     </div>
   )
 }

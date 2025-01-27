@@ -4,6 +4,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MetricCards } from "./metric-cards";
 import { Overview } from "./overview";
 import { RecentActivity } from "./recent-tasks";
+import { JiraTodo } from "./jira-todo";
+import StopWatchContainer from "./StopWatchContainer";
 
 export function DashboardTabs() {
   return (
@@ -30,12 +32,13 @@ export function DashboardTabs() {
       </TabsContent>
       <TabsContent value="Stopwatch" className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border p-6">Stopwatch content</div>
+          {/* <div className="rounded-xl border p-6">Stopwatch content</div> */}
+          <StopWatchContainer />
         </div>
       </TabsContent>
       <TabsContent value="Board" className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border p-6">Board content</div>
+        <div className="">
+          <JiraTodo />
         </div>
       </TabsContent>
     </Tabs>
