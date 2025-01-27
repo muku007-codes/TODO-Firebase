@@ -6,6 +6,7 @@ import { Overview } from "./overview";
 import { RecentActivity } from "./recent-tasks";
 import { JiraTodo } from "./jira-todo";
 import StopWatchContainer from "./StopWatchContainer";
+import { HabitTracker } from "./HabitTracker";
 
 export function DashboardTabs() {
   return (
@@ -26,9 +27,10 @@ export function DashboardTabs() {
         </div>
       </TabsContent>
       <TabsContent value="Habits" className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border p-6">Habits content</div>
-        </div>
+        </div> */}
+          <HabitTracker />
       </TabsContent>
       <TabsContent value="Stopwatch" className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
