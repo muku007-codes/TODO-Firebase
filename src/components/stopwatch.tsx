@@ -14,7 +14,7 @@ type StopwatchProps = {
   todoTitle: string
 };
 
-export function Stopwatch({
+function Stopwatch({
   taskId,
   timeSpent,
   isRunning,
@@ -95,9 +95,9 @@ export function Stopwatch({
   };
 
   return (
-    <Card>
-      <CardContent className="flex flex-col items-center space-y-4 p-6">
-        <div className="">{todoTitle}</div>
+    <Card className="">
+      <CardContent className="flex flex-col items-center space-y-3 p-6">
+        <div className="font-mono text-left">{todoTitle}</div>
         <div className="text-4xl font-bold">{formatTime(localTime)}</div>
         <div className="space-x-2">
           <Button onClick={handleStartStop}>
@@ -112,3 +112,4 @@ export function Stopwatch({
   );
 }
 
+export default Stopwatch;

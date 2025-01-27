@@ -185,7 +185,7 @@ export function JiraTodo() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="p-4 space-y-4 min-h-[200px]"
+                      className="p-4 space-y-4 min-h-[200px] max-h-[400px] overflow-y-scroll custom-scroll-bar"
                     >
                       {columns[status].map((task, index) => (
                         <Draggable
