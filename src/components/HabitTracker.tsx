@@ -12,7 +12,7 @@ type Habit = {
   goal: number;
   achieved: number;
   completedDates: string[]; // Format: YYYY-MM-DD
-  color: "yellow" | "blue" | "green";
+  color: string;
 };
 
 type Note = {
@@ -39,7 +39,7 @@ export function HabitTracker() {
       achieved: 14,
       completedDates: [],
       color: "green",
-    }
+    },
   ]);
   const [newHabit, setNewHabit] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
@@ -153,7 +153,7 @@ export function HabitTracker() {
       const habit: Habit = {
         id: Date.now().toString(),
         name: newHabit,
-        goal: 20,
+        goal: 21,
         achieved: 0,
         completedDates: [],
         color: randomColors(),
@@ -161,6 +161,20 @@ export function HabitTracker() {
       setHabits([...habits, habit]);
       setNewHabit("");
     }
+  };
+
+  const handleGoal = (id: string, value: number) => {
+    setHabits((prev) => {
+      return prev.map((habit) => {
+        if (habit.id === id) {
+          return {
+            ...habit,
+            goal: value,
+          };
+        }
+        return habit;
+      });
+    });
   };
 
   return (
@@ -186,7 +200,9 @@ export function HabitTracker() {
         <table className="w-full">
           <thead>
             <tr>
-              <th className="px-4 py-2 text-left min-w-[200px] italic">Habits</th>
+              <th className="px-4 py-2 text-left min-w-[200px] italic">
+                Habits
+              </th>
               {getWeekDays().map((day, i) => (
                 <th key={i} className="px-2 py-2 text-center w-10">
                   {}
@@ -234,7 +250,16 @@ export function HabitTracker() {
                     </td>
                   );
                 })}
-                <td className="px-4 py-2 text-center">{habit.goal}</td>
+                <td className="px-4 py-2 text-center">
+                  {" "}
+                  <input
+                  className="w-10"
+                    type="number"
+                    id={habit.id}
+                    value={habit.goal}
+                    onChange={(e) => handleGoal(habit.id, Number(e.target.value))}
+                  />{" "}
+                </td>
                 <td
                   className={cn(
                     "px-4 py-2 text-center",
