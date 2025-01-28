@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Search } from 'lucide-react'
+import { useFirebase } from "@/Context/Firebase"
 
 const navigation = [
   { name: "Overview", href: "#" },
@@ -25,7 +26,10 @@ export function Header({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const [activeTab, setActiveTab] = useState("Overview")
+  const [activeTab, setActiveTab] = useState("Overview");
+  const firebase = useFirebase();
+
+  console.log("firebase" ,firebase);
 
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b bg-white">
@@ -33,7 +37,7 @@ export function Header({
         <div className="flex items-center space-x-2">
           <Avatar>
             <AvatarImage src="/placeholder.svg" />
-            <AvatarFallback>AK</AvatarFallback>
+            <AvatarFallback>A</AvatarFallback>
           </Avatar>
           <span className="font-medium">Alicia Koch</span>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
