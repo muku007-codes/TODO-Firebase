@@ -1,22 +1,5 @@
 "use client";
-// [
-//     {
-//       id: "1",
-//       name: "Journal",
-//       goal: 20,
-//       achieved: 19,
-//       completedDates: [],
-//       color: "yellow",
-//     },
-//     {
-//       id: "2",
-//       name: "Exercise",
-//       goal: 20,
-//       achieved: 14,
-//       completedDates: [],
-//       color: "green",
-//     },
-//   ]
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,30 +103,64 @@ export function HabitTracker() {
     return maxCount;
   };
 
-  const toggleHabitCompletion = (habitId: string, date: Date) => {
-    // const dateStr = date.toISOString().split("T")[0]
+  // const toggleHabitCompletion = (habitId: string, date: Date) => {
+  //   const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1)
+  //     .toString()
+  //     .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+  //   console.log("Date => ", dateStr);
+  //   setHabits(
+  //     habits.map((habit) => {
+  //       if (habit.id === habitId) {
+  //         const isCompleted = habit.completedDates.includes(dateStr);
+  //         const completedDates = isCompleted
+  //           ? habit.completedDates.filter((d) => d !== dateStr)
+  //           : [...habit.completedDates, dateStr];
+  //         return {
+  //           ...habit,
+  //           completedDates,
+  //           achieved: getConsecutiveDays(completedDates),
+  //         };
+  //       }
+  //       return habit;
+  //     })
+  //   );
+  // };
+
+  const toggleHabitCompletion = async (habitId: string, date: Date) => {
     const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-    console.log("post - date", dateStr);
-    setHabits(
-      habits.map((habit) => {
-        if (habit.id === habitId) {
-          const isCompleted = habit.completedDates.includes(dateStr);
-          const completedDates = isCompleted
-            ? habit.completedDates.filter((d) => d !== dateStr)
-            : [...habit.completedDates, dateStr];
-          return {
-            ...habit,
-            completedDates,
-            achieved: getConsecutiveDays(completedDates),
-          };
-        }
-        return habit;
-      })
-    );
-  };
+    console.log("Date => ", dateStr);
 
+    const habitToUpdate = habits.find((habit) => habit.id === habitId);
+    if (habitToUpdate) {
+      const isCompleted = habitToUpdate.completedDates.includes(dateStr);
+      const completedDates = isCompleted
+        ? habitToUpdate.completedDates.filter((d) => d !== dateStr)
+        : [...habitToUpdate.completedDates, dateStr];
+      const updatedHabit = {
+        ...habitToUpdate,
+        completedDates,
+        achieved: getConsecutiveDays(completedDates),
+      };
+
+      setHabits((prevHabits) =>
+        prevHabits.map((habit) => (habit.id === habitId ? updatedHabit : habit))
+      );
+
+      if (firebase.user) {
+        try {
+          await firebase.updateHabit(firebase.user.uid, habitId, {
+            completedDates: updatedHabit.completedDates,
+            achieved: updatedHabit.achieved,
+          });
+          console.log("Habit updated successfully!");
+        } catch (error) {
+          console.error("Error updating habit:", error);
+        }
+      }
+    }
+  };
   const addHabit = async () => {
     if (newHabit.length > 0 && firebase.user) {
       if (newHabit.trim()) {
@@ -215,20 +232,6 @@ export function HabitTracker() {
       console.error("Error updating habit:", error);
     }
   };
-
-//   const handleGoal = (id: string, value: number) => {
-//     setHabits((prev) => {
-//       return prev.map((habit) => {
-//         if (habit.id === id) {
-//           return {
-//             ...habit,
-//             goal: value,
-//           };
-//         }
-//         return habit;
-//       });
-//     });
-//   };
 
   return (
     <div className="p-4 space-y-8">

@@ -93,6 +93,19 @@ interface FirebaseContextType {
       lastUpdatedAt?: { seconds: number; nanoseconds: number };
     }
   ) => Promise<void>;
+  updateHabit: (
+    userId: string,
+    habitId: string,
+    updatedData: Partial<{
+      name: string;
+      goal: number;
+      achieved: number;
+      completedDates: string[];
+      color: string;
+      createdAt: Date;
+      lastUpdatedAt?: { seconds: number; nanoseconds: number };
+    }>
+  ) => Promise<void>;
   getTasks: (userId: string) => Promise<any[]>;
   getHabit: (userId: string) => Promise<any[]>;
   updateTask: (
@@ -366,7 +379,7 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
         deleteAllTasks,
         addHabit,
         getHabit,
-        updateHabit
+        updateHabit,
       }}
     >
       {children}
