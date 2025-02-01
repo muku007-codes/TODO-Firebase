@@ -14,7 +14,7 @@ type StopWatchProps = {
   todoTitle: string
 };
 
-function StopWatch({
+export function StopWatch({
   taskId,
   timeSpent,
   isRunning,
@@ -112,4 +112,4 @@ function StopWatch({
   );
 }
 
-export default StopWatch;
+// export StopWatch;

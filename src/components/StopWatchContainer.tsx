@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import StopWatch from "./StopWatch";
+import { StopWatch } from "./SW";
 import { useFirebase } from "@/Context/Firebase";
 
 type Todo = {
