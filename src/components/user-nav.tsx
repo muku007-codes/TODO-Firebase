@@ -11,13 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFirebase } from "@/Context/Firebase";
+import { useNavigate } from "react-router-dom";
 
 export function UserNav() {
   const { user, signOut } = useFirebase();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
   function shortenDisplayName(displayName: any) {
+    if (!displayName) return "T";
     const name = displayName.split(" ");
     if (name.length > 1) {
       return name[0][0].toUpperCase() + name[1][0].toUpperCase();
@@ -28,6 +31,11 @@ export function UserNav() {
     }
   }
 
+  function handleSignOut(){
+    signOut();
+    navigate("/login");
+  }
+
   console.log("user", user);
   return (
     <DropdownMenu>
@@ -35,7 +43,9 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-            <AvatarFallback>{shortenDisplayName(user?.displayName)}</AvatarFallback>
+            <AvatarFallback>
+              {shortenDisplayName(user?.displayName)}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -66,7 +76,7 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut}>
+        <DropdownMenuItem onClick={handleSignOut}>
           Log out
           {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
         </DropdownMenuItem>

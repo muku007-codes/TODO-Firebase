@@ -1,11 +1,20 @@
-// import { DashboardHeader } from "@/components/header"
-import { DashboardShell } from "@/components/shell"
-import { DashboardTabs } from "@/components/tabs"
-import { MainNav } from "@/components/main-nav"
-import { UserNav } from "@/components/user-nav"
-import UpdateTasksDefaults from "@/components/UpdateTasksDefaults"
+import { useEffect } from "react";
+import { DashboardTabs } from "@/components/tabs";
+import { MainNav } from "@/components/main-nav";
+import { UserNav } from "@/components/user-nav";
+import { useFirebase } from "@/Context/Firebase";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardPage() {
+  const { isLoggedIn } = useFirebase();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, []);
+  
   return (
     <div className="flex min-h-screen flex-col custom-scroll-bar">
       <div className="border-b">
@@ -32,6 +41,5 @@ export default function DashboardPage() {
       </div>
       {/* <UpdateTasksDefaults/> */}
     </div>
-  )
+  );
 }
-

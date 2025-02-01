@@ -13,6 +13,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   User,
+  updateProfile,
 } from "firebase/auth";
 import { getDatabase, ref, set, get, child } from "firebase/database";
 
@@ -158,6 +159,8 @@ export const FirebaseProvider: React.FC<{ children: ReactNode }> = ({
         email,
         password
       );
+      const user = userCredential.user;
+      await updateProfile(user, { displayName: name });
       setUser(userCredential.user);
     } catch (error: any) {
       console.error("Error signing up:", error.message);
