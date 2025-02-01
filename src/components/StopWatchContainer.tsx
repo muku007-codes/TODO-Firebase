@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Stopwatch from "./Stopwatch";
+import { StopWatch } from "./SW";
 import { useFirebase } from "@/Context/Firebase";
 
 type Todo = {
@@ -53,7 +53,7 @@ const StopWatchContainer = () => {
   return (
     <>
       {todos?.map((todo, ind) => (
-        <Stopwatch
+        <StopWatch
           key={ind}
           taskId={todo.id}
           timeSpent={todo.timeSpent}
