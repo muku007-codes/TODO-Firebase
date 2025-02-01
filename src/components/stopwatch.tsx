@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useFirebase } from "@/Context/Firebase";
 
-type StopwatchProps = {
+type StopWatchProps = {
   taskId: string;
   timeSpent: number;
   isRunning: boolean;
@@ -14,14 +14,14 @@ type StopwatchProps = {
   todoTitle: string
 };
 
-function Stopwatch({
+function StopWatch({
   taskId,
   timeSpent,
   isRunning,
   lastUpdatedAt,
   onTimeUpdate,
   todoTitle
-}: StopwatchProps) {
+}: StopWatchProps) {
   const [localTime, setLocalTime] = useState(timeSpent);
   const [running, setRunning] = useState(isRunning);
   const firebase = useFirebase();
@@ -112,4 +112,4 @@ function Stopwatch({
   );
 }
 
-export default Stopwatch;
+export default StopWatch;
