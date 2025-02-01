@@ -1,7 +1,7 @@
 // import Link from "next/link"
 
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export function MainNav({
   className,
@@ -13,30 +13,35 @@ export function MainNav({
       {...props}
     >
       <Link
-        href="/dashboard"
+        to="/overview"
+        className="text-sm font-medium transition-colors hover:text-primary"
+      >
+        <img src="../../Logo.svg" alt="Logo" />
+      </Link>
+      <Link
+        to="/overview"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
         Overview
       </Link>
       <Link
-        href="/dashboard/analytics"
+        to="/overview/analytics"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Analytics
       </Link>
       <Link
-        href="/dashboard/notes"
+        to="/overview/notes"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Notes
       </Link>
       <Link
-        href="/dashboard/settings"
+        to="/overview/settings"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Settings
       </Link>
     </nav>
-  )
+  );
 }
-
