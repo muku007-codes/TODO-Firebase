@@ -4,7 +4,7 @@ import { MainNav } from "@/components/main-nav";
 import { UserNav } from "@/components/user-nav";
 import { useFirebase } from "@/Context/Firebase";
 import { useNavigate } from "react-router-dom";
-import { Icons } from "@/components/auth components/icons";
+// import { Icons } from "@/components/auth components/icons";
 
 export default function DashboardPage() {
   const { isLoggedIn } = useFirebase();
