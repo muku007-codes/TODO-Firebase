@@ -2,6 +2,7 @@
 
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import Logo from "../../Logo.svg";
 
 export function MainNav({
   className,
@@ -16,7 +17,7 @@ export function MainNav({
         to="/overview"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
-        <img src="../../Logo.svg" alt="Logo" />
+        <img src={Logo} alt="Logo" />
       </Link>
       <Link
         to="/overview"
