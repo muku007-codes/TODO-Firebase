@@ -13,12 +13,12 @@ export function MainNav({
       className={cn("flex items-center space-x-4 lg:space-x-6", className)}
       {...props}
     >
-      <Link
+      {/* <Link
         to="/overview"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
         <Icons.logo className="h-8 w-8" />
-      </Link>
+      </Link> */}
       <Link
         to="/overview"
         className="text-sm font-medium transition-colors hover:text-primary"

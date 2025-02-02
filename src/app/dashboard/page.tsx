@@ -4,6 +4,7 @@ import { MainNav } from "@/components/main-nav";
 import { UserNav } from "@/components/user-nav";
 import { useFirebase } from "@/Context/Firebase";
 import { useNavigate } from "react-router-dom";
+import { Icons } from "@/components/auth components/icons";
 
 export default function DashboardPage() {
   const { isLoggedIn } = useFirebase();
@@ -19,6 +20,7 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col custom-scroll-bar">
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
+        <Icons.logo className="h-8 w-8" />
           <MainNav className="mx-6" />
           <div className="ml-auto flex items-center space-x-4">
             {/* <Header /> */}
