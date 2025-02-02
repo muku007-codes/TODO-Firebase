@@ -21,7 +21,7 @@ export default function DashboardPage() {
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
           {/* <Icons.logo className="h-8 w-8" /> */}
-          <svg
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -34,7 +34,7 @@ export default function DashboardPage() {
             className="lucide lucide-command h-8 w-8"
           >
             <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"></path>
-          </svg>
+          </svg> */}
           <MainNav className="mx-6" />
           <div className="ml-auto flex items-center space-x-4">
             {/* <Header /> */}
