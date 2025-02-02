@@ -25,12 +25,12 @@ export function MainNav({
       >
         Overview
       </Link>
-      <Link
+      {/* <Link
         to="/overview/analytics"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Analytics
-      </Link>
+      </Link> */}
       <Link
         to="/overview/notes"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
