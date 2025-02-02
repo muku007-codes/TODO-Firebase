@@ -2,7 +2,7 @@
 
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import Logo from "../../Logo.svg";
+import Logo from "../../logo.svg";
 
 export function MainNav({
   className,
